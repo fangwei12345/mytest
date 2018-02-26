@@ -1,0 +1,123 @@
+打包 压缩
+.rar .zip
+.tar.gz  .tar.bz2		--最常见的两种压缩格式
+
+# tar -zcvf etc.tar.gz /etc/    --压缩成.tar.gz
+# tar -jcvf etc.tar.bz2 /etc/	--压缩成.tar.bz2
+
+# tar -ztvf  etc.tar.gz 	--查看.tar.gz的文件
+# tar -jtvf  etc.tar.bz2	--查看.tar.bz2的文件
+
+# tar -zxvf etc.tar.gz		--解压.tar.gz到当前目录
+# tar -jxvf etc.tar.bz2		--解压.tar.bz2到当前目录
+
+练习： 使用两种格式，压缩/lib目录。
+
+
+# tar -zxvf lib.tar.gz -C /usr/local/src/  --指定解压路径
+# tar -zxvf etc.tar.gz "etc/yum.repos.d/rhel-source.repo"
+				      --指定解压某个文件
+
+解压===>
+etc.bz2 ==> bzip2 -d etc.bz2  等价于  bunzip2 etc.bz2
+etc.gz 	==> gzip  -d etc.gz   等价于  gunzip etc.gz
+etc.zip	==> unzip etc.zip 
+
+
+#　dd if="input_file" of="outptu_file" bs="block_size" 
+count="number"
+
+/dev/zero   --零字节
+/dev/null   --黑洞文件
+
+--硬盘测速
+
+# dd if=/dev/sda5 of=/dev/sdb5   (/dev/sdb5 >= /dev/sda5)
+
+
+# grep -v 取反匹配
+
+# vi /etc/inittab   --修改系统的运行级别
+id:3:initdefault:	--5改成3，系统启动到字符界面
+id:5:initdefault:	--系统启动到图形化界面
+
+
+rpm包安装：
+
+# mount /dev/cdrom /media  --挂载光驱
+# vi /etc/rc.local
+mount /dev/cdrom /media
+# rpm -ivh bind-9.8.2-0.17.rc1.el6.i686.rpm  --安装rpm包
+# rpm -qa　　--列出当前系统已安装的所有rpm包
+# rpm -qa | grep bind --查看某个包是否安装
+# rpm -e bind　--卸载rpm包　
+
+rpm的依赖  ==>  yum命令
+安装A.rpm--->B.rpm--->D.rpm--->E.rpm
+	 --->C.rpm
+
+使用yum命令去安装rpm包，可以解决依赖的麻烦。
+要使用yum命令必须配置yum仓库（存放大量的rpm包）==> /etc/yum.repos.d/
+
+rhel-source.repo  --以.repo结尾的文件是yum仓库配置文件
+
+
+# yum list | grep "httpd"  --列表查看包是否安装
+# yum -y install httpd     --安装httpd
+# yum -y remove mysql	   --卸载mysql
+
+
+源码包安装：
+1)配置
+# ./configure --prefix=/dir
+2)编译
+#　make
+3)安装
+＃ make install
+
+编译安装apache:
+# yum -y install gcc
+# ./configure --prefix=/usr/local/apache 必须进入解压目录
+目录
+# make
+# make install
+
+netstat -an
+
+/usr/local/apache/bin/apachectl start  --启动httpd
+/usr/local/apache/bin/apachectl stop   --停止httpd
+
+默认启动80端口
+1)修改主配置文件httpd.conf
+# vi /usr/local/apache/conf/httpd.conf  
+Include conf/extra/httpd-vhosts.conf  --去掉前面的#号
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+#    Order deny,allow		--前面添加#号
+#    Deny from all		--前面添加#号
+</Directory>
+
+2)修改站点配置文件
+# vi /usr/local/apache/conf/extra/httpd-vhosts.conf
+<VirtualHost *:80>
+    DocumentRoot "/wwwroot"	--用来存放网页代码
+    ServerName dummy-host.example.com
+    ServerAlias www.dremap.com www.lansaipu.com --访问域名
+    ErrorLog "logs/lansaipu-error_log"	--网站错误日志
+    CustomLog "logs/lansaipu-access_log" common --网站日志
+</VirtualHost>
+
+3）创建站点目录
+# mkdir /wwwroot 	--创建网站根目录
+# echo "This is test" >> /wwwroot/index.html
+
+4)最后重启apache
+# /usr/local/apache/bin/apachectl stop
+# /usr/local/apache/bin/apachectl start
+
+5)在windows机器的hosts文件       --改变域名解析
+C:\Windows\System32\Drivers\etc\hosts
+192.168.17.130	www.lansaipu.com    --注意IP修改成你自己的
+192.168.17.130	www.dremap.com
